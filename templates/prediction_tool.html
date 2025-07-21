@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHT Club Prediction Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo Bharat Cheline VVIP" class="logo">
+
+        <h1>BHT Club Prediction Tools</h1>
+        <p class="welcome-message">Welcome! Use this tool wisely.</p>
+
+        <div class="game-section" data-game-type="wingo-1-min">
+            <h2>WinGo 1 Minute</h2>
+            <p>Current Period: <span id="period-wingo-1-min">Loading...</span></p> <div class="timer" id="timer-wingo-1-min">01:00</div>
+            <p>Prediction: <span id="prediction-wingo-1-min">Waiting...</span></p>
+        </div>
+
+        <div class="game-section" data-game-type="wingo-30-sec">
+            <h2>WinGo 30 Seconds</h2>
+            <p>Current Period: <span id="period-wingo-30-sec">Loading...</span></p> <div class="timer" id="timer-wingo-30-sec">00:30</div>
+            <p>Prediction: <span id="prediction-wingo-30-sec">Waiting...</span></p>
+        </div>
+
+        <div class="game-section" data-game-type="moto-race">
+            <h2>Moto Race</h2>
+            <p>Current Period: <span id="period-moto-race">Loading...</span></p> <div class="timer" id="timer-moto-race">00:15</div>
+            <p>Prediction: <span id="prediction-moto-race">Waiting...</span></p>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+</body>
+</html>
