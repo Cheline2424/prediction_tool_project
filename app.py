@@ -18,11 +18,13 @@ current_game_data = {
 }
 
 def calculate_countdown(end_time_ms):
+    """
+    Menghitung waktu mundur dari timestamp akhir dalam milidetik.
+    Mengembalikan format MM:SS.
+    """
     if not end_time_ms:
         return "00:00"
 
-    # Adjust for potential server/client time zone differences if necessary
-    # For simplicity, we assume UTC timestamps from server
     current_time_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
     remaining_ms = end_time_ms - current_time_ms
 
@@ -35,9 +37,10 @@ def calculate_countdown(end_time_ms):
     return f"{minutes:02d}:{seconds:02d}"
 
 def game_data_fetcher():
+    # Pastikan URL ini benar-benar untuk game WinGo_30S dan WinGo_1M
     base_url_30s = "https://draw.ar-lottery01.com/WinGo/WinGo_30S.json"
-    base_url_1m = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json" # Asumsi ini masih benar
-
+    base_url_1m = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json"
+    
     headers = {
         "Accept": "application/json, text/plain, */*",
         "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -63,12 +66,15 @@ def game_data_fetcher():
             response_30s.raise_for_status()
             data_30s = response_30s.json()
 
-            # PENTING: Ambil dari objek 'current'
+            # Pastikan mengambil dari objek 'current' yang berisi data terkini
             current_data_30s = data_30s.get("current")
             if current_data_30s:
                 issue_number_30s = current_data_30s.get("issueNumber")
                 end_time_ms_30s = current_data_30s.get("endTime")
                 countdown_30s = calculate_countdown(end_time_ms_30s)
+
+                # Tambahkan print di sini untuk melihat nilai yang diekstrak
+                print(f"WinGo 30S - issueNumber: {issue_number_30s}, endTime: {end_time_ms_30s}, countdown: {countdown_30s}")
 
                 current_game_data["WinGo_30S"]["period"] = issue_number_30s
                 current_game_data["WinGo_30S"]["countdown"] = countdown_30s
@@ -83,29 +89,42 @@ def game_data_fetcher():
             response_1m.raise_for_status()
             data_1m = response_1m.json()
 
-            # PENTING: Ambil dari objek 'current'
+            # Pastikan mengambil dari objek 'current' yang berisi data terkini
             current_data_1m = data_1m.get("current")
             if current_data_1m:
                 issue_number_1m = current_data_1m.get("issueNumber")
                 end_time_ms_1m = current_data_1m.get("endTime")
                 countdown_1m = calculate_countdown(end_time_ms_1m)
+                
+                # Tambahkan print di sini untuk melihat nilai yang diekstrak
+                print(f"WinGo 1Min - issueNumber: {issue_number_1m}, endTime: {end_time_ms_1m}, countdown: {countdown_1m}")
 
                 current_game_data["WinGo_1Min"]["period"] = issue_number_1m
                 current_game_data["WinGo_1Min"]["countdown"] = countdown_1m
             else:
                 print("Peringatan: Objek 'current' tidak ditemukan di response WinGo 1M.")
 
+
             socketio.emit('game_update', current_game_data)
             print(f"Mengirim update: {current_game_data}")
 
         except requests.exceptions.RequestException as e:
             print(f"Error saat mengambil data via HTTP: {e}")
+            current_game_data["WinGo_1Min"] = {"period": "Error", "countdown": "Error"}
+            current_game_data["WinGo_30S"] = {"period": "Error", "countdown": "Error"}
+            socketio.emit('game_update', current_game_data) # Kirim error ke frontend
         except json.JSONDecodeError:
             print(f"Menerima response non-JSON atau JSON tidak valid.")
+            current_game_data["WinGo_1Min"] = {"period": "JSON Error", "countdown": "JSON Error"}
+            current_game_data["WinGo_30S"] = {"period": "JSON Error", "countdown": "JSON Error"}
+            socketio.emit('game_update', current_game_data) # Kirim error ke frontend
         except Exception as e:
             print(f"Terjadi error tak terduga di game data fetcher: {e}")
-
-        time.sleep(3) # Kembali ke 3 detik, atau 5 detik jika masih timeout
+            current_game_data["WinGo_1Min"] = {"period": "Unknown Error", "countdown": "Unknown Error"}
+            current_game_data["WinGo_30S"] = {"period": "Unknown Error", "countdown": "Unknown Error"}
+            socketio.emit('game_update', current_game_data) # Kirim error ke frontend
+        
+        time.sleep(3) # Tunggu 3 detik
 
 @app.route('/')
 def index():
@@ -123,5 +142,5 @@ def test_disconnect():
 if __name__ == '__main__':
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not os.environ.get('WERKZEUG_RUN_MAIN'):
         socketio.start_background_task(target=game_data_fetcher)
-
+    
     socketio.run(app, host='0.0.0.0', port=os.environ.get('PORT', 5000), allow_unsafe_werkzeug=True)
