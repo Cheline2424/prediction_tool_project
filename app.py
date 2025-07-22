@@ -1,59 +1,43 @@
 import os
-import time # Mengganti asyncio.sleep dengan time.sleep
+import time
 import json
-import threading # Tetap diperlukan jika SocketIO tidak dijalankan secara langsung di main thread
+import threading
 from datetime import datetime, timedelta, timezone
 
-import requests # Kita menggunakan requests untuk HTTP GET
+import requests
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-# Inisialisasi aplikasi Flask
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here' # Ganti dengan kunci rahasia yang kuat!
-socketio = SocketIO(app, cors_allowed_origins="*") # Mengizinkan CORS untuk SocketIO
+app.config['SECRET_KEY'] = 'your_secret_key_here'
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Variabel global untuk menyimpan data game terbaru
 current_game_data = {
     "WinGo_1Min": {"period": "N/A", "countdown": "00:00"},
     "WinGo_30S": {"period": "N/A", "countdown": "00:00"}
 }
 
-# Fungsi untuk menghitung countdown
 def calculate_countdown(end_time_ms):
-    """
-    Menghitung waktu mundur dari timestamp akhir dalam milidetik.
-    Mengembalikan format MM:SS.
-    """
     if not end_time_ms:
         return "00:00"
 
-    # Waktu saat ini dalam milidetik
+    # Adjust for potential server/client time zone differences if necessary
+    # For simplicity, we assume UTC timestamps from server
     current_time_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
-
-    # Selisih waktu dalam milidetik
     remaining_ms = end_time_ms - current_time_ms
 
     if remaining_ms <= 0:
         return "00:00"
 
-    # Konversi ke detik
     remaining_seconds = remaining_ms // 1000
-
     minutes = remaining_seconds // 60
     seconds = remaining_seconds % 60
-
     return f"{minutes:02d}:{seconds:02d}"
 
-# Fungsi untuk mengambil data game secara berkala (sekarang bukan async)
 def game_data_fetcher():
-    # Base URL untuk mengambil data game WinGo_30S.json
     base_url_30s = "https://draw.ar-lottery01.com/WinGo/WinGo_30S.json"
+    base_url_1m = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json" # Asumsi ini masih benar
 
-    # Base URL untuk mengambil data game WinGo_1M.json (kita asumsikan mirip)
-    base_url_1m = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json"
-
-    # Headers yang Anda berikan sebelumnya
     headers = {
         "Accept": "application/json, text/plain, */*",
         "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -76,16 +60,20 @@ def game_data_fetcher():
             full_url_30s = f"{base_url_30s}?ts={timestamp_30s}"
             print(f"Mengambil data WinGo 30S dari: {full_url_30s}")
             response_30s = requests.get(full_url_30s, headers=headers, timeout=5)
-            response_30s.raise_for_status() # Akan memunculkan error jika status bukan 2xx
+            response_30s.raise_for_status()
             data_30s = response_30s.json()
 
-            if data_30s.get("gameCode") == "WinGo_30S":
-                issue_number_30s = data_30s.get("issueNumber")
-                end_time_ms_30s = data_30s.get("endTime")
+            # PENTING: Ambil dari objek 'current'
+            current_data_30s = data_30s.get("current")
+            if current_data_30s:
+                issue_number_30s = current_data_30s.get("issueNumber")
+                end_time_ms_30s = current_data_30s.get("endTime")
                 countdown_30s = calculate_countdown(end_time_ms_30s)
 
                 current_game_data["WinGo_30S"]["period"] = issue_number_30s
                 current_game_data["WinGo_30S"]["countdown"] = countdown_30s
+            else:
+                print("Peringatan: Objek 'current' tidak ditemukan di response WinGo 30S.")
 
             # --- Ambil data WinGo 1 Minute ---
             timestamp_1m = int(datetime.now().timestamp() * 1000)
@@ -95,16 +83,18 @@ def game_data_fetcher():
             response_1m.raise_for_status()
             data_1m = response_1m.json()
 
-            if data_1m.get("gameCode") == "WinGo_1M":
-                issue_number_1m = data_1m.get("issueNumber")
-                end_time_ms_1m = data_1m.get("endTime")
+            # PENTING: Ambil dari objek 'current'
+            current_data_1m = data_1m.get("current")
+            if current_data_1m:
+                issue_number_1m = current_data_1m.get("issueNumber")
+                end_time_ms_1m = current_data_1m.get("endTime")
                 countdown_1m = calculate_countdown(end_time_ms_1m)
 
                 current_game_data["WinGo_1Min"]["period"] = issue_number_1m
                 current_game_data["WinGo_1Min"]["countdown"] = countdown_1m
+            else:
+                print("Peringatan: Objek 'current' tidak ditemukan di response WinGo 1M.")
 
-            # Kirim update ke semua klien web melalui SocketIO
-            # Penting: gunakan socketio.emit() di dalam background task
             socketio.emit('game_update', current_game_data)
             print(f"Mengirim update: {current_game_data}")
 
@@ -115,40 +105,23 @@ def game_data_fetcher():
         except Exception as e:
             print(f"Terjadi error tak terduga di game data fetcher: {e}")
 
-        # Tunggu sebentar sebelum request berikutnya
-        time.sleep(1) # Tunggu 1 detik
+        time.sleep(3) # Kembali ke 3 detik, atau 5 detik jika masih timeout
 
-# Rute utama untuk menampilkan halaman
 @app.route('/')
 def index():
-    return render_template('prediction_tool.html', game_data=current_game_data) # Pastikan ini prediction_tool.html
+    return render_template('prediction_tool.html', game_data=current_game_data)
 
-# SocketIO event handler ketika client terhubung
 @socketio.on('connect')
 def test_connect():
     print('Client terhubung!')
-    # Kirim data saat ini ke client yang baru terhubung
     emit('game_update', current_game_data)
-    # Mulai background task fetcher data hanya sekali ketika client pertama terhubung
-    # Ini mencegah running multiple fetchers jika banyak client terhubung
-    # Namun, untuk aplikasi web yang di-deploy, lebih baik dimulai di __main__
-    # if not hasattr(app, 'game_fetcher_started'):
-    #     socketio.start_background_task(target=game_data_fetcher)
-    #     app.game_fetcher_started = True
-
 
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client terputus!')
 
-# Jalankan background task game_data_fetcher saat aplikasi Flask dimulai
-# Ini memastikan fetcher berjalan terlepas dari koneksi SocketIO client
 if __name__ == '__main__':
-    # Ini adalah cara yang lebih baik untuk menjalankan background task
-    # socketio.start_background_task akan mengelola threading/asyncio secara internal
-    # Pastikan ini hanya berjalan sekali saat debug reloader aktif
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not os.environ.get('WERKZEUG_RUN_MAIN'):
         socketio.start_background_task(target=game_data_fetcher)
 
-    # Jalankan aplikasi Flask dengan SocketIO
     socketio.run(app, host='0.0.0.0', port=os.environ.get('PORT', 5000), allow_unsafe_werkzeug=True)
