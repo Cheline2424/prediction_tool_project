@@ -1,2 +1,7 @@
 Flask
 gunicorn
+requests
+flask-socketio
+python-engineio
+python-socketio
+websockets

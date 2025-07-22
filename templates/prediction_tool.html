@@ -9,30 +9,32 @@
 <body>
     <div class="container">
         <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo Bharat Cheline VVIP" class="logo">
-
         <h1>BHT Club Prediction Tools</h1>
         <p class="welcome-message">Welcome! Use this tool wisely.</p>
 
         <div class="game-section" data-game-type="wingo-1-min">
             <h2>WinGo 1 Minute</h2>
-            <p>Current Period: <span id="period-wingo-1-min">Loading...</span></p> <div class="timer" id="timer-wingo-1-min">01:00</div>
-            <p>Prediction: <span id="prediction-wingo-1-min">Waiting...</span></p>
+            <p>Current Period: <span id="wingo-1-min-period">{{ game_data['WinGo_1Min']['period'] }}</span></p>
+            <div class="countdown" id="wingo-1-min-countdown">{{ game_data['WinGo_1Min']['countdown'] }}</div>
+            <p>Prediction: Prediction: Red</p>
         </div>
 
         <div class="game-section" data-game-type="wingo-30-sec">
             <h2>WinGo 30 Seconds</h2>
-            <p>Current Period: <span id="period-wingo-30-sec">Loading...</span></p> <div class="timer" id="timer-wingo-30-sec">00:30</div>
-            <p>Prediction: <span id="prediction-wingo-30-sec">Waiting...</span></p>
+            <p>Current Period: <span id="wingo-30-sec-period">{{ game_data['WinGo_30S']['period'] }}</span></p>
+            <div class="countdown" id="wingo-30-sec-countdown">{{ game_data['WinGo_30S']['countdown'] }}</div>
+            <p>Prediction: Prediction: Small</p>
         </div>
 
         <div class="game-section" data-game-type="moto-race">
             <h2>Moto Race</h2>
-            <p>Current Period: <span id="period-moto-race">Loading...</span></p> <div class="timer" id="timer-moto-race">00:15</div>
-            <p>Prediction: <span id="prediction-moto-race">Waiting...</span></p>
+            <p>Current Period: <span>756</span></p>
+            <div class="countdown">00:11</div>
+            <p>Prediction: Prediction: Motor A</p>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
 </body>
 </html>
