@@ -65,8 +65,9 @@ def game_data_fetcher():
             response_30s = requests.get(full_url_30s, headers=headers, timeout=5)
             response_30s.raise_for_status()
             data_30s = response_30s.json()
-data_30s = response_30s.json()
-            print(f"DEBUG: Full JSON response for WinGo 30S: {json.dumps(data_30s, indent=2)}") # <-- TAMBAHKAN BARIS INI
+            # Ini adalah baris print yang penting untuk debugging
+            print(f"DEBUG: Full JSON response for WinGo 30S: {json.dumps(data_30s, indent=2)}")
+
             # Pastikan mengambil dari objek 'current' yang berisi data terkini
             current_data_30s = data_30s.get("current")
             if current_data_30s:
@@ -89,6 +90,8 @@ data_30s = response_30s.json()
             response_1m = requests.get(full_url_1m, headers=headers, timeout=5)
             response_1m.raise_for_status()
             data_1m = response_1m.json()
+            # Ini adalah baris print yang penting untuk debugging
+            print(f"DEBUG: Full JSON response for WinGo 1M: {json.dumps(data_1m, indent=2)}")
 
             # Pastikan mengambil dari objek 'current' yang berisi data terkini
             current_data_1m = data_1m.get("current")
