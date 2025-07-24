@@ -3,38 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BHT Club Prediction Tools</title>
+    <title>Prediction Tool</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
-    <div class="container">
-        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo Bharat Cheline VVIP" class="logo">
-        <h1>BHT Club Prediction Tools</h1>
-        <p class="welcome-message">Welcome! Use this tool wisely.</p>
+    <header>
+        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" class="logo">
+        <h1>Prediction Tool</h1>
+        <nav>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
 
-        <div class="game-section" data-game-type="wingo-1-min">
+    <main>
+        <section class="game-section">
             <h2>WinGo 1 Minute</h2>
-            <p>Current Period: <span id="wingo-1-min-period">{{ game_data['WinGo_1Min']['period'] }}</span></p>
-            <div class="countdown" id="wingo-1-min-countdown">{{ game_data['WinGo_1Min']['countdown'] }}</div>
-            <p>Prediction: Prediction: Red</p>
-        </div>
+            <div class="game-info">
+                <p>Current Period: <span id="period-1min">{{ game_data['WinGo_1Min']['period'] }}</span></p>
+                <p>Countdown: <span id="countdown-1min">{{ game_data['WinGo_1Min']['countdown'] }}</span></p>
+                <p>Result Number: <span id="number-1min" class="result-number">{{ game_data['WinGo_1Min']['result_number'] }}</span></p>
+                <p>Result Color: <span id="color-1min" class="result-color" style="background-color: {{ game_data['WinGo_1Min']['result_color'] == 'green' and '#008000' or (game_data['WinGo_1Min']['result_color'] == 'red' and '#FF0000') or (game_data['WinGo_1Min']['result_color'] == 'violet-red' and 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)') or (game_data['WinGo_1Min']['result_color'] == 'violet-green' and 'linear-gradient(to right, #EE82EE 50%, #008000 50%)') or '#CCCCCC' }};">{{ game_data['WinGo_1Min']['result_color'] }}</span></p>
+            </div>
+        </section>
 
-        <div class="game-section" data-game-type="wingo-30-sec">
+        <section class="game-section">
             <h2>WinGo 30 Seconds</h2>
-            <p>Current Period: <span id="wingo-30-sec-period">{{ game_data['WinGo_30S']['period'] }}</span></p>
-            <div class="countdown" id="wingo-30-sec-countdown">{{ game_data['WinGo_30S']['countdown'] }}</div>
-            <p>Prediction: Prediction: Small</p>
-        </div>
+            <div class="game-info">
+                <p>Current Period: <span id="period-30s">{{ game_data['WinGo_30S']['period'] }}</span></p>
+                <p>Countdown: <span id="countdown-30s">{{ game_data['WinGo_30S']['countdown'] }}</span></p>
+                <p>Result Number: <span id="number-30s" class="result-number">{{ game_data['WinGo_30S']['result_number'] }}</span></p>
+                <p>Result Color: <span id="color-30s" class="result-color" style="background-color: {{ game_data['WinGo_30S']['result_color'] == 'green' and '#008000' or (game_data['WinGo_30S']['result_color'] == 'red' and '#FF0000') or (game_data['WinGo_30S']['result_color'] == 'violet-red' and 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)') or (game_data['WinGo_30S']['result_color'] == 'violet-green' and 'linear-gradient(to right, #EE82EE 50%, #008000 50%)') or '#CCCCCC' }};">{{ game_data['WinGo_30S']['result_color'] }}</span></p>
+            </div>
+        </section>
 
-        <div class="game-section" data-game-type="moto-race">
+        <section class="game-section">
             <h2>Moto Race</h2>
-            <p>Current Period: <span>756</span></p>
-            <div class="countdown">00:11</div>
-            <p>Prediction: Prediction: Motor A</p>
-        </div>
-    </div>
+            <div class="game-info">
+                <p>Current Period: <span id="period-moto">{{ game_data['Moto_Race']['period'] }}</span></p>
+                <p>Countdown: <span id="countdown-moto">{{ game_data['Moto_Race']['countdown'] }}</span></p>
+                <p>Result Number: <span id="number-moto" class="result-number">{{ game_data['Moto_Race']['result_number'] }}</span></p>
+                <p>Result Color: <span id="color-moto" class="result-color" style="background-color: {{ game_data['Moto_Race']['result_color'] == 'green' and '#008000' or (game_data['Moto_Race']['result_color'] == 'red' and '#FF0000') or (game_data['Moto_Race']['result_color'] == 'violet-red' and 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)') or (game_data['Moto_Race']['result_color'] == 'violet-green' and 'linear-gradient(to right, #EE82EE 50%, #008000 50%)') or '#CCCCCC' }};">{{ game_data['Moto_Race']['result_color'] }}</span></p>
+            </div>
+        </section>
+    </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <footer>
+        <p>&copy; 2025 Prediction Tool</p>
+    </footer>
+
+    <script>
+        const socket = io();
+
+        socket.on('connect', function() {
+            console.log('Terhubung ke server Socket.IO');
+        });
+
+        socket.on('game_update', function(data) {
+            console.log('Menerima update game:', data);
+            
+            // Update WinGo 1 Minute
+            document.getElementById('period-1min').textContent = data.WinGo_1Min.period;
+            document.getElementById('countdown-1min').textContent = data.WinGo_1Min.countdown;
+            document.getElementById('number-1min').textContent = data.WinGo_1Min.result_number;
+            const color1MinElement = document.getElementById('color-1min');
+            color1MinElement.textContent = data.WinGo_1Min.result_color;
+            if (data.WinGo_1Min.result_color === 'green') {
+                color1MinElement.style.backgroundColor = '#008000';
+            } else if (data.WinGo_1Min.result_color === 'red') {
+                color1MinElement.style.backgroundColor = '#FF0000';
+            } else if (data.WinGo_1Min.result_color === 'violet-red') {
+                color1MinElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)';
+            } else if (data.WinGo_1Min.result_color === 'violet-green') {
+                color1MinElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #008000 50%)';
+            } else {
+                color1MinElement.style.backgroundColor = '#CCCCCC'; // Default or unknown color
+            }
+
+
+            // Update WinGo 30 Seconds
+            document.getElementById('period-30s').textContent = data.WinGo_30S.period;
+            document.getElementById('countdown-30s').textContent = data.WinGo_30S.countdown;
+            document.getElementById('number-30s').textContent = data.WinGo_30S.result_number;
+            const color30SElement = document.getElementById('color-30s');
+            color30SElement.textContent = data.WinGo_30S.result_color;
+            if (data.WinGo_30S.result_color === 'green') {
+                color30SElement.style.backgroundColor = '#008000';
+            } else if (data.WinGo_30S.result_color === 'red') {
+                color30SElement.style.backgroundColor = '#FF0000';
+            } else if (data.WinGo_30S.result_color === 'violet-red') {
+                color30SElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)';
+            } else if (data.WinGo_30S.result_color === 'violet-green') {
+                color30SElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #008000 50%)';
+            } else {
+                color30SElement.style.backgroundColor = '#CCCCCC'; // Default or unknown color
+            }
+
+            // Update Moto Race
+            document.getElementById('period-moto').textContent = data.Moto_Race.period;
+            document.getElementById('countdown-moto').textContent = data.Moto_Race.countdown;
+            document.getElementById('number-moto').textContent = data.Moto_Race.result_number;
+            const colorMotoElement = document.getElementById('color-moto');
+            colorMotoElement.textContent = data.Moto_Race.result_color;
+            if (data.Moto_Race.result_color === 'green') {
+                colorMotoElement.style.backgroundColor = '#008000';
+            } else if (data.Moto_Race.result_color === 'red') {
+                colorMotoElement.style.backgroundColor = '#FF0000';
+            } else if (data.Moto_Race.result_color === 'violet-red') {
+                colorMotoElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #FF0000 50%)';
+            } else if (data.Moto_Race.result_color === 'violet-green') {
+                colorMotoElement.style.background = 'linear-gradient(to right, #EE82EE 50%, #008000 50%)';
+            } else {
+                colorMotoElement.style.backgroundColor = '#CCCCCC'; // Default or unknown color
+            }
+        });
+    </script>
 </body>
 </html>

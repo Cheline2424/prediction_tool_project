@@ -148,7 +148,7 @@ def game_data_fetcher():
 @app.route('/')
 def login():
     """Menampilkan halaman login."""
-    return render_template('login.html') # Kita akan buat file login.html
+    return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
 def do_login():
@@ -179,4 +179,47 @@ def index():
 # ====================================================================
 # Event Listener SocketIO
 # ====================================================================
-@socketio.
+@socketio.on('connect')
+def handle_connect():
+    """Menangani koneksi klien SocketIO baru."""
+    print('Client terhubung!')
+    # Kirim data game yang terakhir diketahui segera setelah klien terhubung
+    emit('game_update', {
+        "WinGo_1Min": {
+            "period": current_game_data["WinGo_1Min"]["period"],
+            "countdown": current_game_data["WinGo_1Min"]["countdown"],
+            "result_number": current_game_data["WinGo_1Min"]["result_number"],
+            "result_color": current_game_data["WinGo_1Min"]["result_color"]
+        },
+        "WinGo_30S": {
+            "period": current_game_data["WinGo_30S"]["period"],
+            "countdown": current_game_data["WinGo_30S"]["countdown"],
+            "result_number": current_game_data["WinGo_30S"]["result_number"],
+            "result_color": current_game_data["WinGo_30S"]["result_color"]
+        },
+        "Moto_Race": {
+            "period": current_game_data["Moto_Race"]["period"],
+            "countdown": current_game_data["Moto_Race"]["countdown"],
+            "result_number": current_game_data["Moto_Race"]["result_number"],
+            "result_color": current_game_data["Moto_Race"]["result_color"]
+        }
+    })
+
+    # Memulai background task untuk mengambil data jika belum berjalan.
+    if not hasattr(socketio, '_background_task_started') or not socketio._background_task_started:
+        socketio.start_background_task(target=game_data_fetcher)
+        socketio._background_task_started = True # Tandai bahwa task sudah dimulai
+        print("Memulai background task game_data_fetcher (random data mode).")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Menangani pemutusan koneksi klien SocketIO."""
+    print('Client terputus!')
+
+# ====================================================================
+# Jalankan Aplikasi (Hanya untuk Pengembangan Lokal)
+# ====================================================================
+if __name__ == '__main__':
+    # Untuk menjalankan lokal, set password di sini atau di env variable
+    # app.config['APP_PASSWORD'] = 'your_secure_password_here'
+    socketio.run(app, debug=True, port=os.environ.get("PORT", 5000))
