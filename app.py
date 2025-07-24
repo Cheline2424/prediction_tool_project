@@ -122,4 +122,4 @@ def game_data_fetcher():
                 end_time_ms_moto = current_data_moto.get("endTime")
                 countdown_moto = calculate_countdown(end_time_ms_moto)
                 current_game_data["Moto_Race"]["period"] = issue_number_moto
-                current_game_data["Moto_Race"]["countdown
+                current_game_data["Moto_Race"]["countdown"] = countdown_moto
