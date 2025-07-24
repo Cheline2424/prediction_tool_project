@@ -1,10 +1,10 @@
 import eventlet
-eventlet.monkey_patch() # Penting: Lakukan monkey patch di awal
+eventlet.monkey_patch() # Penting: Lakukan monkey patch di awal untuk kompatibilitas eventlet
 
 import os
 import json
 from datetime import datetime
-import requests
+import httpx # Menggunakan httpx sebagai ganti requests
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
@@ -66,14 +66,14 @@ def game_data_fetcher():
     }
 
     while True:
-        # Menghapus blok try-except untuk sementara waktu demi mengatasi syntax error.
-        # Jika ada error HTTP/network, aplikasi akan crash, tapi ini untuk debugging syntax.
+        # Mengambil data tanpa blok try-except untuk debugging masalah syntax/koneksi awal.
+        # Jika ada error HTTP/network, aplikasi akan crash dan Render akan me-restart.
         
         # === WinGo 30S ===
         timestamp_30s = int(datetime.now().timestamp() * 1000)
         full_url_30s = f"{base_url_30s}?ts={timestamp_30s}"
         print(f"Mengambil data WinGo 30S dari: {full_url_30s}")
-        response_30s = requests.get(full_url_30s, headers=headers, timeout=5)
+        response_30s = httpx.get(full_url_30s, headers=headers, timeout=5) # Menggunakan httpx.get
         response_30s.raise_for_status() # Akan memunculkan error untuk status kode HTTP yang buruk (4xx atau 5xx)
         data_30s = response_30s.json()
 
@@ -92,7 +92,7 @@ def game_data_fetcher():
         timestamp_1m = int(datetime.now().timestamp() * 1000)
         full_url_1m = f"{base_url_1m}?ts={timestamp_1m}"
         print(f"Mengambil data WinGo 1M dari: {full_url_1m}")
-        response_1m = requests.get(full_url_1m, headers=headers, timeout=5)
+        response_1m = httpx.get(full_url_1m, headers=headers, timeout=5) # Menggunakan httpx.get
         response_1m.raise_for_status()
         data_1m = response_1m.json()
 
@@ -111,7 +111,7 @@ def game_data_fetcher():
         timestamp_moto = int(datetime.now().timestamp() * 1000)
         full_url_moto = f"{base_url_moto}?ts={timestamp_moto}"
         print(f"Mengambil data Moto Race dari: {full_url_moto}")
-        response_moto = requests.get(full_url_moto, headers=headers, timeout=5)
+        response_moto = httpx.get(full_url_moto, headers=headers, timeout=5) # Menggunakan httpx.get
         response_moto.raise_for_status()
         data_moto = response_moto.json()
 
