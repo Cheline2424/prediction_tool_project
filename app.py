@@ -3,7 +3,7 @@ import json
 import threading
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_socketio import SocketIO, emit # Mengembalikan Flask-SocketIO
+from flask_socketio import SocketIO, emit
 import random
 import time
 
@@ -14,13 +14,12 @@ app = Flask(__name__)
 
 # Konfigurasi SECRET_KEY untuk Flask
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_super_secret_fallback_key_CHANGE_THIS_IN_PRODUCTION')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) # Sesi bertahan 1 jam
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
 # Password utama untuk akses awal aplikasi
-# AMBIL DARI ENVIRONMENT VARIABLE DI RENDER ATAU GANTI DENGAN PASSWORD ASLI ANDA
-MAIN_PASSWORD = os.environ.get('MAIN_APP_PASSWORD', 'bhtclub24') # Menggunakan bhtclub24 sebagai default
+MAIN_PASSWORD = os.environ.get('MAIN_APP_PASSWORD', 'bhtclub24')
 
-# Inisialisasi SocketIO dengan mode threading untuk menghindari masalah kompilasi gevent
+# Inisialisasi SocketIO dengan mode threading
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # ====================================================================
@@ -36,7 +35,7 @@ current_game_data = {
 GAME_INTERVALS = {
     "wingo_1_min": 60,
     "wingo_30_sec": 30,
-    "moto_race": 60 
+    "moto_race": 60
 }
 
 # ====================================================================
@@ -254,5 +253,7 @@ def handle_disconnect():
 # Jalankan Aplikasi
 # ====================================================================
 if __name__ == '__main__':
+    # Ini akan dijalankan saat Anda menjalankan 'python app.py' secara lokal
+    # Ini penting untuk pengembangan lokal dengan SocketIO
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, debug=True, port=port)
