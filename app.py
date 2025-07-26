@@ -1,13 +1,11 @@
-import eventlet
-eventlet.monkey_patch() # Penting: Lakukan monkey patch di awal
-
 import os
 import json
-from datetime import datetime
-# import httpx # TIDAK DIPERLUKAN LAGI KARENA TIDAK AMBIL DATA EKSTERNAL
+import threading
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_socketio import SocketIO, emit
-import random # Import modul random
+from flask_socketio import SocketIO, emit # Mengembalikan Flask-SocketIO
+import random
+import time
 
 # ====================================================================
 # Konfigurasi Aplikasi Flask
@@ -15,41 +13,39 @@ import random # Import modul random
 app = Flask(__name__)
 
 # Konfigurasi SECRET_KEY untuk Flask
-# Ini SANGAT PENTING untuk keamanan sesi dan Flask-SocketIO.
-# Ambil dari Environment Variable di Render atau gunakan nilai fallback yang kuat.
-# Anda HARUS menambahkan SECRET_KEY di Environment Variables Render Anda.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_super_secret_fallback_key_CHANGE_THIS_IN_PRODUCTION')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) # Sesi bertahan 1 jam
 
-# Contoh password (ubah ini di lingkungan produksi atau gunakan hashing yang lebih aman)
-# Untuk saat ini, kita akan gunakan password sederhana agar mudah
-PASSWORD = os.environ.get('APP_PASSWORD', 'your_secure_password_here') # GANTI DENGAN PASSWORD ASLI ANDA
+# Password utama untuk akses awal aplikasi
+# AMBIL DARI ENVIRONMENT VARIABLE DI RENDER ATAU GANTI DENGAN PASSWORD ASLI ANDA
+MAIN_PASSWORD = os.environ.get('MAIN_APP_PASSWORD', 'bhtclub24') # Menggunakan bhtclub24 sebagai default
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+# Inisialisasi SocketIO dengan mode threading untuk menghindari masalah kompilasi gevent
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # ====================================================================
 # Variabel Global untuk Data Game
 # ====================================================================
 current_game_data = {
-    "WinGo_1Min": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0},
-    "WinGo_30S": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0},
-    "Moto_Race": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0}
+    "wingo_1_min": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0, "big_small": "N/A"},
+    "wingo_30_sec": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0, "big_small": "N/A"},
+    "moto_race": {"period": "N/A", "countdown": "00:00", "results": [], "end_time": 0}
 }
 
 # Define game intervals in seconds
 GAME_INTERVALS = {
-    "WinGo_1Min": 60,
-    "WinGo_30S": 30,
-    "Moto_Race": 60 # Asumsi sama dengan 1 menit jika tidak ada data dari API
+    "wingo_1_min": 60,
+    "wingo_30_sec": 30,
+    "moto_race": 60 
 }
 
 # ====================================================================
 # Fungsi Bantu
 # ====================================================================
-def generate_random_game_result():
-    """Menghasilkan nomor dan warna random."""
+def generate_random_wingo_result():
+    """Menghasilkan nomor, warna, dan ukuran (besar/kecil) random untuk WinGo."""
     number = random.randint(0, 9)
     
-    # Warna berdasarkan aturan WinGo (0, 5 = violet+red/green, lainnya single color)
     if number == 0:
         color = "violet-red"
     elif number == 5:
@@ -59,7 +55,31 @@ def generate_random_game_result():
     else: # 2, 4, 6, 8
         color = "red"
     
-    return number, color
+    big_small = "Big" if number >= 5 else "Small"
+    if number == 0 or number == 5:
+        pass
+
+    return {"number": number, "color": color, "big_small": big_small}
+
+def generate_random_moto_race_results():
+    """Menghasilkan hasil random untuk Moto Race."""
+    results = []
+    available_numbers = list(range(1, 10))
+    random.shuffle(available_numbers)
+
+    for i in range(1, 4):
+        if not available_numbers: 
+            break
+        num = available_numbers.pop(0)
+        odd_even = "Odd" if num % 2 != 0 else "Even"
+        big_small = "Big" if num >= 5 else "Small"
+        results.append({
+            "position": f"Rank {i}",
+            "number": num,
+            "odd_even": odd_even,
+            "big_small": big_small
+        })
+    return results
 
 def calculate_countdown(end_time_ms):
     """Menghitung hitungan mundur dari waktu berakhir dalam milidetik."""
@@ -72,34 +92,26 @@ def calculate_countdown(end_time_ms):
     return f"{minutes:02d}:{seconds:02d}"
 
 # ====================================================================
-# Fungsi Pengambilan Data Game (Background Task) - Sekarang Generate Random
+# Fungsi Pengambilan Data Game (Background Task) - SocketIO
 # ====================================================================
 def game_data_fetcher():
     """Menghasilkan data game random secara periodik dan mengirimkannya ke klien via SocketIO."""
     
-    # URL dan Headers untuk API lama tidak diperlukan lagi
-    # base_url_30s = "https://draw.ar-lottery01.com/WinGo/WinGo_30S.json"
-    # base_url_1m = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json"
-    # base_url_moto = "https://draw.ar-lottery01.com/WinGo/Moto_Race.json"
-
-    # headers = {
-    #     "Referer": "https://bharatclub.net/",
-    #     "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"130\"",
-    #     "Sec-Ch-Ua-Mobile": "?1",
-    #     "Sec-Fetch-Dest": "empty",
-    #     "Sec-Fetch-Mode": "cors",
-    #     "Sec-Fetch-Site": "cross-site",
-    #     "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36"
-    # }
-
     # Inisialisasi waktu berakhir untuk putaran pertama jika aplikasi baru dimulai
     for game_type, interval in GAME_INTERVALS.items():
         if current_game_data[game_type]["end_time"] == 0:
             current_game_data[game_type]["end_time"] = (datetime.now().timestamp() + interval) * 1000
-            current_game_data[game_type]["period"] = random.randint(1000000, 9999999) # Random Period Awal
-            num, col = generate_random_game_result()
-            current_game_data[game_type]["result_number"] = num
-            current_game_data[game_type]["result_color"] = col
+            current_game_data[game_type]["period"] = random.randint(1000000, 9999999)
+            
+            if game_type.startswith("wingo"):
+                result = generate_random_wingo_result()
+                current_game_data[game_type]["result_number"] = result["number"]
+                current_game_data[game_type]["result_color"] = result["color"]
+                current_game_data[game_type]["big_small"] = result["big_small"]
+            elif game_type == "moto_race":
+                current_game_data[game_type]["results"] = generate_random_moto_race_results()
+            
+            print(f"Inisialisasi data untuk {game_type}: {current_game_data[game_type]}")
 
     while True:
         current_time_ms = datetime.now().timestamp() * 1000
@@ -108,73 +120,94 @@ def game_data_fetcher():
             # Jika countdown sudah berakhir atau belum diset, generate data baru
             if current_time_ms >= current_game_data[game_type]["end_time"]:
                 current_game_data[game_type]["end_time"] = (datetime.now().timestamp() + interval) * 1000
-                current_game_data[game_type]["period"] = random.randint(1000000, 9999999) # Random Period Baru
-                num, col = generate_random_game_result()
-                current_game_data[game_type]["result_number"] = num
-                current_game_data[game_type]["result_color"] = col
-                print(f"Menggenerasi data baru untuk {game_type}: Period {current_game_data[game_type]['period']}, Number {num}, Color {col}")
+                current_game_data[game_type]["period"] = random.randint(1000000, 9999999)
+                
+                if game_type.startswith("wingo"):
+                    result = generate_random_wingo_result()
+                    current_game_data[game_type]["result_number"] = result["number"]
+                    current_game_data[game_type]["result_color"] = result["color"]
+                    current_game_data[game_type]["big_small"] = result["big_small"]
+                elif game_type == "moto_race":
+                    current_game_data[game_type]["results"] = generate_random_moto_race_results()
+                
+                print(f"Menggenerasi data baru untuk {game_type}: {current_game_data[game_type]}")
 
             current_game_data[game_type]["countdown"] = calculate_countdown(current_game_data[game_type]["end_time"])
 
         # Kirim data terbaru ke semua klien yang terhubung melalui SocketIO
         socketio.emit('game_update', {
-            "WinGo_1Min": {
-                "period": current_game_data["WinGo_1Min"]["period"],
-                "countdown": current_game_data["WinGo_1Min"]["countdown"],
-                "result_number": current_game_data["WinGo_1Min"]["result_number"],
-                "result_color": current_game_data["WinGo_1Min"]["result_color"]
+            "wingo_1_min": {
+                "period": current_game_data["wingo_1_min"]["period"],
+                "countdown": current_game_data["wingo_1_min"]["countdown"],
+                "number": current_game_data["wingo_1_min"]["result_number"],
+                "color": current_game_data["wingo_1_min"]["result_color"],
+                "big_small": current_game_data["wingo_1_min"]["big_small"]
             },
-            "WinGo_30S": {
-                "period": current_game_data["WinGo_30S"]["period"],
-                "countdown": current_game_data["WinGo_30S"]["countdown"],
-                "result_number": current_game_data["WinGo_30S"]["result_number"],
-                "result_color": current_game_data["WinGo_30S"]["result_color"]
+            "wingo_30_sec": {
+                "period": current_game_data["wingo_30_sec"]["period"],
+                "countdown": current_game_data["wingo_30_sec"]["countdown"],
+                "number": current_game_data["wingo_30_sec"]["result_number"],
+                "color": current_game_data["wingo_30_sec"]["result_color"],
+                "big_small": current_game_data["wingo_30_sec"]["big_small"]
             },
-            "Moto_Race": {
-                "period": current_game_data["Moto_Race"]["period"],
-                "countdown": current_game_data["Moto_Race"]["countdown"],
-                "result_number": current_game_data["Moto_Race"]["result_number"],
-                "result_color": current_game_data["Moto_Race"]["result_color"]
+            "moto_race": {
+                "period": current_game_data["moto_race"]["period"],
+                "countdown": current_game_data["moto_race"]["countdown"],
+                "results": current_game_data["moto_race"]["results"]
             }
         })
-        print(f"Data game terbaru dikirim: {current_game_data}")
 
-        # Tunggu 1 detik sebelum memperbarui data
-        eventlet.sleep(1)
+        time.sleep(1)
 
 # ====================================================================
 # Route Flask
 # ====================================================================
 @app.route('/')
-def login():
-    """Menampilkan halaman login."""
-    return render_template('login.html')
+def show_landing_page():
+    """Menampilkan halaman landing utama."""
+    if session.get('authenticated') and datetime.now().timestamp() < session.get('auth_expiry', 0):
+        return redirect(url_for('dashboard'))
+    
+    return render_template('index.html')
 
-@app.route('/login', methods=['POST'])
-def do_login():
-    """Memproses login."""
-    password = request.form.get('password')
-    if password == PASSWORD:
-        session['logged_in'] = True
-        flash('Login berhasil!', 'success')
-        return redirect(url_for('index'))
+@app.route('/authenticate', methods=['POST'])
+def authenticate():
+    """Memproses autentikasi password."""
+    password_attempt = request.form.get('password')
+    if password_attempt == MAIN_PASSWORD:
+        session['authenticated'] = True
+        session['auth_expiry'] = (datetime.now() + app.config['PERMANENT_SESSION_LIFETIME']).timestamp()
+        session.permanent = True
+        flash('Access granted!', 'success')
+        return redirect(url_for('dashboard'))
     else:
-        flash('Password salah. Silakan coba lagi.', 'danger')
-        return redirect(url_for('login'))
+        flash('Incorrect password. Please try again.', 'danger')
+        return redirect(url_for('show_landing_page'))
+
+@app.route('/dashboard')
+def dashboard():
+    """Merender halaman utama aplikasi (setelah autentikasi)."""
+    if not session.get('authenticated') or datetime.now().timestamp() >= session.get('auth_expiry', 0):
+        session.pop('authenticated', None)
+        session.pop('auth_expiry', None)
+        flash('Your session has expired or you are not logged in. Please enter the password to access the tools.', 'danger')
+        return redirect(url_for('show_landing_page'))
+    
+    return render_template('prediction_tool.html', game_data=current_game_data)
+
+# Route baru untuk halaman guide
+@app.route('/guide')
+def guide_page():
+    """Menampilkan halaman panduan (guide.html)."""
+    return render_template('guide.html')
 
 @app.route('/logout')
 def logout():
-    """Melakukan logout."""
-    session.pop('logged_in', None)
-    flash('Anda telah logout.', 'info')
-    return redirect(url_for('login'))
-
-@app.route('/dashboard') # Ubah route utama menjadi /dashboard
-def index():
-    """Merender halaman utama aplikasi (setelah login)."""
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('prediction_tool.html', game_data=current_game_data)
+    """Melakukan logout dan kembali ke halaman landing page."""
+    session.pop('authenticated', None)
+    session.pop('auth_expiry', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('show_landing_page'))
 
 # ====================================================================
 # Event Listener SocketIO
@@ -182,44 +215,44 @@ def index():
 @socketio.on('connect')
 def handle_connect():
     """Menangani koneksi klien SocketIO baru."""
-    print('Client terhubung!')
+    print('Client connected!')
     # Kirim data game yang terakhir diketahui segera setelah klien terhubung
     emit('game_update', {
-        "WinGo_1Min": {
-            "period": current_game_data["WinGo_1Min"]["period"],
-            "countdown": current_game_data["WinGo_1Min"]["countdown"],
-            "result_number": current_game_data["WinGo_1Min"]["result_number"],
-            "result_color": current_game_data["WinGo_1Min"]["result_color"]
+        "wingo_1_min": {
+            "period": current_game_data["wingo_1_min"]["period"],
+            "countdown": current_game_data["wingo_1_min"]["countdown"],
+            "number": current_game_data["wingo_1_min"]["result_number"],
+            "color": current_game_data["wingo_1_min"]["result_color"],
+            "big_small": current_game_data["wingo_1_min"]["big_small"]
         },
-        "WinGo_30S": {
-            "period": current_game_data["WinGo_30S"]["period"],
-            "countdown": current_game_data["WinGo_30S"]["countdown"],
-            "result_number": current_game_data["WinGo_30S"]["result_number"],
-            "result_color": current_game_data["WinGo_30S"]["result_color"]
+        "wingo_30_sec": {
+            "period": current_game_data["wingo_30_sec"]["period"],
+            "countdown": current_game_data["wingo_30_sec"]["countdown"],
+            "number": current_game_data["wingo_30_sec"]["result_number"],
+            "color": current_game_data["wingo_30_sec"]["result_color"],
+            "big_small": current_game_data["wingo_30_sec"]["big_small"]
         },
-        "Moto_Race": {
-            "period": current_game_data["Moto_Race"]["period"],
-            "countdown": current_game_data["Moto_Race"]["countdown"],
-            "result_number": current_game_data["Moto_Race"]["result_number"],
-            "result_color": current_game_data["Moto_Race"]["result_color"]
+        "moto_race": {
+            "period": current_game_data["moto_race"]["period"],
+            "countdown": current_game_data["moto_race"]["countdown"],
+            "results": current_game_data["moto_race"]["results"]
         }
     })
 
     # Memulai background task untuk mengambil data jika belum berjalan.
     if not hasattr(socketio, '_background_task_started') or not socketio._background_task_started:
         socketio.start_background_task(target=game_data_fetcher)
-        socketio._background_task_started = True # Tandai bahwa task sudah dimulai
-        print("Memulai background task game_data_fetcher (random data mode).")
+        socketio._background_task_started = True
+        print("Starting game_data_fetcher background task (random data mode).")
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Menangani pemutusan koneksi klien SocketIO."""
-    print('Client terputus!')
+    print('Client disconnected!')
 
 # ====================================================================
-# Jalankan Aplikasi (Hanya untuk Pengembangan Lokal)
+# Jalankan Aplikasi
 # ====================================================================
 if __name__ == '__main__':
-    # Untuk menjalankan lokal, set password di sini atau di env variable
-    # app.config['APP_PASSWORD'] = 'your_secure_password_here'
-    socketio.run(app, debug=True, port=os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, debug=True, port=port)

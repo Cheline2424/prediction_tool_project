@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Club Prediction Tool Guide - Smart, Legal & Simple</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Gaya khusus untuk halaman guide */
+        body {
+            background-color: #8B0000; /* Warna latar belakang merah gelap seperti di screenshot */
+            color: #f0f2f5; /* Teks putih */
+        }
+        .guide-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #343a40; /* Latar belakang abu-abu gelap untuk konten */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            line-height: 1.6;
+        }
+        .guide-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .guide-header .logo-small {
+            max-width: 100px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        .guide-header .top-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .guide-header .top-nav a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: #555;
+            transition: background-color 0.3s ease;
+        }
+        .guide-header .top-nav a:hover {
+            background-color: #777;
+        }
+        .guide-title {
+            font-size: 2.5em;
+            color: #FFD700;
+            margin-bottom: 15px;
+            background-color: #FFD700; /* Latar belakang kuning untuk judul */
+            color: #8B0000; /* Teks merah gelap */
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block; /* Agar padding berlaku */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .guide-meta {
+            font-size: 0.9em;
+            color: #bbb;
+        }
+        .guide-section h2 {
+            font-size: 1.8em;
+            color: #FFD700; /* Kuning untuk sub-judul */
+            margin-top: 30px;
+            margin-bottom: 15px;
+            background-color: #FFD700; /* Latar belakang kuning */
+            color: #8B0000; /* Teks merah gelap */
+            padding: 8px 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .guide-section h3 {
+            font-size: 1.4em;
+            color: #FFD700; /* Kuning untuk sub-sub-judul */
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .guide-section p, .guide-section li {
+            font-size: 1em;
+            color: #f0f2f5;
+            margin-bottom: 10px;
+        }
+        .guide-section ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .guide-section ol {
+            list-style-type: decimal;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .guide-section a {
+            color: #007bff; /* Biru untuk tautan */
+            text-decoration: none;
+        }
+        .guide-section a:hover {
+            text-decoration: underline;
+        }
+        .guide-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .comment-section {
+            margin-top: 50px;
+            border-top: 1px solid #555;
+            padding-top: 30px;
+        }
+        .comment-section h2 {
+            background-color: #FFD700; /* Latar belakang kuning */
+            color: #8B0000; /* Teks merah gelap */
+            padding: 8px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .comment-form input[type="text"],
+        .comment-form input[type="email"],
+        .comment-form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #777;
+            border-radius: 5px;
+            background-color: #555;
+            color: white;
+        }
+        .comment-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .comment-form button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+        .comment-form button:hover {
+            background-color: #218838;
+        }
+        .pagination-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            border-top: 1px solid #555;
+            padding-top: 20px;
+        }
+        .pagination-links a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .pagination-links a:hover {
+            text-decoration: underline;
+        }
+        .footer-nav-guide {
+            background-color: #343a40;
+            color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        .footer-nav-guide a {
+            color: #adb5bd;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+        .footer-nav-guide a:hover {
+            color: #e9ecef;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <header class="guide-header">
+            <!-- Perbaikan jalur gambar logo kecil -->
+            <img src="{{ url_for('static', filename='logo_utama.png') }}" alt="Bharat Club Logo" class="logo-small">
+            <div class="top-nav">
+                <a href="https://bharatclub.net/blog" target="_blank">BLOG</a>
+                <a href="https://bharatclub.net/#/login" target="_blank">LOGIN</a>
+                <a href="https://bharatclub.bet/#/register?invitationCode=521765158649" target="_blank">REGISTER</a>
+            </div>
+            <h1 class="guide-title">Bharat Club Prediction Tool – Smart, Legal & Simple</h1>
+            <!-- Perbaikan teks tanggal dan nama -->
+            <p class="guide-meta">JUL 5, 2025 — by cheline in Colour Trading</p>
+        </header>
+
+        <div class="guide-content">
+            <p>If you’re searching for a reliable Bharat Club Prediction Tool, chances are you’ve either lost a few rounds or want a better shot at winning in games like WinGo. Let’s be honest — everyone wants to beat the odds, and some even search for <strong>Bharat Club number hack</strong> tools. But here’s the reality: hacking doesn’t work, and you risk your data, device, and legal status by trying.</p>
+            <p>This article introduces a <strong>safe, user-friendly prediction tool</strong> that helps you analyze outcomes more strategically — with no illegal scripts, no modified APKs, and no empty promises. To find the <strong>PASSWORD</strong> keep read the post.</p>
+
+            <div class="guide-section">
+                <h2>What Is the Bharat Club Prediction Tool?</h2>
+                <p>The <strong>Bharat Club Prediction Tool</strong> is a browser-based assistant developed to help users make educated guesses about game results, especially in <strong>WinGo</strong> or similar number-based games on the Bharat Club platform. It uses randomization logic and standard outcomes to generate potential results in a fair way.</p>
+                <p>You can try the live tool here:</p>
+                <p><a href="{{ url_for('dashboard') }}" target="_blank"><i class="fas fa-link"></i> BHARAT CLUB WINGO PREDICTION TOOLS</a></p>
+                <p>The result is not 100% but you will get more win than you play alone</p>
+                <!-- Pastikan nama file ini persis sama dengan yang ada di folder static Anda -->
+                <img src="{{ url_for('static', filename='bht_club_prediction_image.png.jpg') }}" alt="Bht Club Bharat Club Prediction Wingo Prediction Tirang Prediction Number Prediction">
+            </div>
+
+            <div class="guide-section">
+                <h2>Is This a Hack Tool?</h2>
+                <p><strong>Absolutely not.</strong> This is <strong>not a hack</strong> like the <a href="#">91 Club Hack</a> that viral online in the India Community this lately and it doesn’t modify the game servers, your app, or your phone system. Why? Because real-time gaming platforms like Bharat Club use encrypted systems that cannot be tampered with legally or practically.</p>
+                <p>Claims like:</p>
+                <ul>
+                    <li>“Unlimited Coin Hack for Bharat Club”</li>
+                    <li>“Mod APK for Bharat Club Prediction”</li>
+                    <li>“Inject Tools for WinGo Bharat Club”</li>
+                </ul>
+                <p>…are <strong>fake, risky</strong>, and often used to trick you into downloading malware or scams.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>How the Prediction Tool Works</h2>
+                <p>The tool is based on:</p>
+                <ul>
+                    <li>Random number logic</li>
+                    <li>Regular pattern simulation</li>
+                    <li>Period-based segmentation (1-minute and 30-second modes)</li>
+                    <li>Time-based updates that ensure new outcomes every round</li>
+                </ul>
+                <p>Once you click Predict and put the correct password, you will get a randomized outcome like this:</p>
+                <!-- Pastikan nama file ini persis sama dengan yang ada di folder static Anda -->
+                <img src="{{ url_for('static', filename='wingo_prediction_tool_example.png.jpg') }}" alt="Wingo Prediction Tool Example">
+                <p>If you try clicking again within the same time period, it will prevent you from repeating predictions to maintain fairness.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>Features of the Bharat Club Prediction Tool</h2>
+                <ul>
+                    <li><strong>1-Minute & 30-Second Modes:</strong> Choose your game speed</li>
+                    <li><strong>Real-Time Periods:</strong> Predictions update in sync with Bharat Club periods</li>
+                    <li><strong>Countdown Clock:</strong> Tells you when to expect the next prediction</li>
+                    <li><strong>Safe & Clean:</strong> No need to download anything</li>
+                    <li><strong>Telegram Integration (Optional):</strong> Auto-publish predictions to your group</li>
+                </ul>
+            </div>
+
+            <div class="guide-section">
+                <h2>Why You Should Avoid Bharat Club Hacks</h2>
+                <h3>Fake APKs Can Steal Your Data</h3>
+                <p>Most “hacks” are modded apps filled with spyware. Once installed, they can access:</p>
+                <ul>
+                    <li>Contacts</li>
+                    <li>Banking info</li>
+                    <li>Personal photos</li>
+                </ul>
+                <h3>Hacking Is Illegal</h3>
+                <p>Trying to tamper with a game platform’s system violates both <a href="#">Bharat Club’s Terms of Service</a> and national cyber laws. You could lose your account — or worse.</p>
+                <h3>No Predictive Guarantee</h3>
+                <p>Even the tool we offer doesn’t claim 100% win rate. It’s just better than guessing blindly.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>How To Use the Tool (Step-by-Step)</h2>
+                <ol>
+                    <li>Open the prediction page on your browser (mobile-friendly).</li>
+                    <li>Choose between:
+                        <ul>
+                            <li>“WinGo 1 Minute”</li>
+                            <li>“WinGo 30 Second”</li>
+                        </ul>
+                    </li>
+                    <li>Click GET PREDICTION ?</li>
+                    <li>Put the password Then click GET PREDICTION ?again.</li>
+                    <li>Get the password from <a href="https://t.me/BHTCLUBWITHCHELINEE" target="_blank">BHT CLUB WITH CHELINEE Telegram</a>. You need to register and make deposit first so can get the password to use the tool.</li>
+                    <li>Wait until the countdown ends before trying again.</li>
+                    <li>Use the predicted values to guide your prediction, not replace your judgment.</li>
+                </ol>
+            </div>
+
+            <div class="guide-section">
+                <h2>Tips to Boost Your Prediction Strategy</h2>
+                <ul>
+                    <li>Don’t bet all-in based on one prediction.</li>
+                    <li>Keep track of trends (e.g., color repetition patterns).</li>
+                    <li>Use the <strong>prediction history panel</strong> built into the tool.</li>
+                    <li>Join Telegram channels for live signals (optional).</li>
+                    <li>Avoid emotional betting — this is still chance-based.</li>
+                </ul>
+            </div>
+
+            <div class="guide-section">
+                <h2>Is the Bharat Club Prediction Tool Safe</h2>
+                <p>Yes. This tool:</p>
+                <ul>
+                    <li>Doesn’t ask for your Bharat Club login</li>
+                    <li>Doesn’t track personal data</li>
+                    <li>Doesn’t download or install files</li>
+                    <li>Doesn’t modify the Bharat Club game</li>
+                </ul>
+                <p>It runs in the browser and relies on open JavaScript logic. You can even inspect the source code yourself.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>Will It Work With Every Game?</h2>
+                <p>Currently, the tool is optimized for Bharat Club and Bht Club <strong>WinGo</strong> prediction. It might work with other games like Tiranga Game or 91 Club or Bdg game or Diuwin or Goa Game or Jalwa game or Ok Win that use similar pattern logic, but it’s not guaranteed. You can try it and decide based on your own experience.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>Frequently Asked Questions</h2>
+                <p><strong>Q: What is the password?</strong><br>
+                A: Get the password from <a href="https://t.me/BHTCLUBWITHCHELINEE" target="_blank">BHT CLUB WITH CHELINEE Telegram</a>. You need to register and make deposit first so can get the password to use the tool.</p>
+                <p><strong>Q: Can I win every round using this prediction tool?</strong><br>
+                A: No. This is not a guaranteed winning tool — it’s a smart guide.</p>
+                <p><strong>Q: Can I use this on mobile?</strong><br>
+                A: Yes! It’s fully responsive and works in all modern browsers.</p>
+                <p><strong>Q: Is there any login required?</strong><br>
+                A: No. No login or account is needed.</p>
+                <p><strong>Q: Can I use this for 91 Club or Tiranga Game?</strong><br>
+                A: Technically yes, but the results are calibrated for Bharat Club’s structure.</p>
+            </div>
+
+            <div class="guide-section">
+                <h2>Final Thoughts – Play Smart, Not Desperate</h2>
+                <p>Try it now and see how much better your predictions become:</p>
+                <p><a href="{{ url_for('dashboard') }}" target="_blank"><i class="fas fa-link"></i> Try Prediction Tool</a></p>
+                <p><a href="#" target="_blank"><i class="fas fa-link"></i> Register and Play only in our official link</a></p>
+            </div>
+
+            <div class="guide-section">
+                <h2>Table of Contents</h2>
+                <ul>
+                    <li><a href="#what-is-tool">What Is the Bharat Club Prediction Tool?</a></li>
+                    <li><a href="#is-hack-tool">Is This a Hack Tool?</a></li>
+                    <li><a href="#how-tool-works">How the Prediction Tool Works</a></li>
+                    <li><a href="#features">Features of the Bharat Club Prediction Tool?</a></li>
+                    <li><a href="#avoid-hacks">Why You Should Avoid Bharat Club Hacks</a></li>
+                    <li><a href="#how-to-use">How To Use the Tool (Step-by-Step)</a></li>
+                    <li><a href="#tips">Tips to Boost Your Prediction Strategy</a></li>
+                    <li><a href="#is-safe">Is the Bharat Club Prediction Tool Safe?</a></li>
+                    <li><a href="#will-work">Will It Work With Every Game?</a></li>
+                    <li><a href="#faq">Frequently Asked Questions</a></li>
+                    <li><a href="#final-thoughts">Final Thoughts – Play Smart, Not Desperate</a></li>
+                </ul>
+            </div>
+
+            <div class="comment-section">
+                <h2>Comments</h2>
+                <p>One response to “Bharat Club Prediction Tool – Smart, Legal & Simple”</p>
+                <p>Bht Club Prediction – 5 Guide of Color Prediction Games let’s Win Big Together</p>
+                <p>May 7, 2025</p>
+                <p>[...] CLUB PREDICTION TOOLSClick here for guide how to use the tools ??????? Bht Club Prediction Tools GuideThe result is not 100% but you will get more win than you play alone</p>
+                <p>So play and use 3x methods if [...]</p>
+                <a href="#">Reply</a>
+
+                <h3>Leave a Reply</h3>
+                <form class="comment-form">
+                    <textarea placeholder="Your email address will not be published. Required fields are marked *" required></textarea>
+                    <input type="text" placeholder="Name *" required>
+                    <input type="email" placeholder="Email *" required>
+                    <input type="text" placeholder="Website">
+                    <label><input type="checkbox"> Save my name, email, and website in this browser for the next time I comment.</label>
+                    <button type="submit">Post Comment</button>
+                </form>
+            </div>
+
+            <div class="pagination-links">
+                <a href="#">&larr; Previous: BHT Club the best Gaming platform in India find the 5 reason why</a>
+                <a href="#">Next: Tiranga Prediction Tool: 100% Sureshot is real or fake &rarr;</a>
+            </div>
+        </div>
+
+        <footer class="footer-nav-guide">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Disclaimer</a>
+            <a href="#" class="footer-link">Contact Us</a>
+            <a href="#" class="footer-link">About Us</a>
+            <a href="#" class="footer-link">FAQ</a>
+            <a href="https://github.com/your-bhtclub-github" target="_blank" class="footer-link">Bht Club GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,54 +1,33 @@
-// script.js
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded. Initializing Socket.IO...');
-
     // Inisialisasi koneksi Socket.IO
-    // Jika di-deploy di Render, URL akan sama dengan URL Flask.
-    // Jika ada masalah koneksi, coba spesifikasikan URL Render Anda:
-    // var socket = io('https://prediction-tool-project.onrender.com');
     var socket = io();
 
-    // Event listener ketika berhasil terhubung ke Socket.IO server
-    socket.on('connect', function() {
-        console.log('Socket.IO: Terhubung ke server!');
-    });
-
-    // Event listener ketika terputus dari Socket.IO server
-    socket.on('disconnect', function() {
-        console.log('Socket.IO: Terputus dari server!');
-    });
-
-    // Event listener untuk menerima update game dari server Flask
+    // Tangani event 'game_update' dari server
     socket.on('game_update', function(data) {
-        console.log('Socket.IO: Menerima update game:', data); // Ini akan tampil di Console Developer Tools Anda
+        // Update WinGo 1 Minute
+        document.getElementById('wingo_1_min_period').textContent = data.wingo_1_min.period;
+        document.getElementById('wingo_1_min_countdown').textContent = data.wingo_1_min.countdown;
+        document.getElementById('wingo_1_min_number').textContent = data.wingo_1_min.number;
+        document.getElementById('wingo_1_min_color').textContent = data.wingo_1_min.color;
+        document.getElementById('wingo_1_min_big_small').textContent = data.wingo_1_min.big_small;
 
-        // Pastikan data yang diterima memiliki struktur yang diharapkan
-        if (data && typeof data === 'object') {
-            // Update WinGo 1 Minute
-            var wingo1MinPeriod = document.getElementById('wingo-1-min-period');
-            var wingo1MinCountdown = document.getElementById('wingo-1-min-countdown');
+        // Update WinGo 30 Second
+        document.getElementById('wingo_30_sec_period').textContent = data.wingo_30_sec.period;
+        document.getElementById('wingo_30_sec_countdown').textContent = data.wingo_30_sec.countdown;
+        document.getElementById('wingo_30_sec_number').textContent = data.wingo_30_sec.number;
+        document.getElementById('wingo_30_sec_color').textContent = data.wingo_30_sec.color;
+        document.getElementById('wingo_30_sec_big_small').textContent = data.wingo_30_sec.big_small;
 
-            if (wingo1MinPeriod && wingo1MinCountdown && data.WinGo_1Min) {
-                wingo1MinPeriod.textContent = data.WinGo_1Min.period || 'N/A';
-                wingo1MinCountdown.textContent = data.WinGo_1Min.countdown || '00:00';
-                console.log('WinGo 1 Min updated:', data.WinGo_1Min.period, data.WinGo_1Min.countdown);
-            } else {
-                console.warn('Could not find WinGo 1 Min elements or data is missing.', {wingo1MinPeriod, wingo1MinCountdown, dataWinGo1Min: data.WinGo_1Min});
-            }
-
-            // Update WinGo 30 Seconds
-            var wingo30SecPeriod = document.getElementById('wingo-30-sec-period');
-            var wingo30SecCountdown = document.getElementById('wingo-30-sec-countdown');
-
-            if (wingo30SecPeriod && wingo30SecCountdown && data.WinGo_30S) {
-                wingo30SecPeriod.textContent = data.WinGo_30S.period || 'N/A';
-                wingo30SecCountdown.textContent = data.WinGo_30S.countdown || '00:00';
-                console.log('WinGo 30 Sec updated:', data.WinGo_30S.period, data.WinGo_30S.countdown);
-            } else {
-                console.warn('Could not find WinGo 30 Sec elements or data is missing.', {wingo30SecPeriod, wingo30SecCountdown, dataWinGo30S: data.WinGo_30S});
-            }
-        } else {
-            console.error('Socket.IO: Received invalid game_update data:', data);
-        }
+        // Update Moto Race
+        document.getElementById('moto_race_period').textContent = data.moto_race.period;
+        document.getElementById('moto_race_countdown').textContent = data.moto_race.countdown;
+        
+        const motoRaceResultsList = document.getElementById('moto_race_results');
+        motoRaceResultsList.innerHTML = ''; // Bersihkan hasil sebelumnya
+        data.moto_race.results.forEach(result => {
+            const li = document.createElement('li');
+            li.textContent = `${result.position}: Number ${result.number} (${result.odd_even}, ${result.big_small})`;
+            motoRaceResultsList.appendChild(li);
+        });
     });
 });

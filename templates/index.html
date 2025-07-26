@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Club Prediction Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="main-wrapper">
+        <header class="header-section">
+            <h1 class="main-title">WINGO PREDICTION TOOLS</h1>
+            <h2 class="sub-title">BHT CLUB - BHARAT CLUB</h2>
+            <p class="tagline">BHT CLUB - BHARAT CLUB GAME PREDICTION TOOL</p>
+        </header>
+
+        <div class="container">
+            <!-- Perbaikan jalur gambar logo -->
+            <img src="{{ url_for('static', filename='logo_utama.png') }}" alt="Logo Bharat Cheline VVIP" class="logo">
+            <div class="button-group">
+                <!-- Tombol game akan mengarah ke halaman dashboard -->
+                <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="far fa-clock"></i> WinGo 1 Minute</button>
+                <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="far fa-clock"></i> WinGo 30 Second</button>
+                <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="fas fa-motorcycle"></i> Moto Race</button>
+            </div>
+            <!-- Tautan guide akan mengarah ke halaman guide.html -->
+            <button class="guide-link" onclick="window.location.href='{{ url_for('guide_page') }}';"><i class="fas fa-link"></i> Bharat Club Prediction Tools Guide</button>
+
+            <div class="info-box">
+                <p>Remember to get tool PASSWORD you must make deposit minimum ₹500 for WINGO prediction and ₹1000 for Moto Race prediction first.</p>
+                <!-- Tombol ini akan mengarah ke tautan Telegram -->
+                <button class="password-button" onclick="window.open('https://t.me/BHTCLUBWITHCHELINEE', '_blank');">CLICK TO GET PASSWORD</button>
+            </div>
+
+            <div class="login-section">
+                <h3>Enter Password to Access the Tool</h3>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class="flashes">
+                            {% for category, message in messages %}
+                                <li class="{{ category }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                <form action="{{ url_for('authenticate') }}" method="post">
+                    <input type="password" name="password" placeholder="Enter password..." required>
+                    <button type="submit">ENTER PASSWORD</button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer-nav">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Disclaimer</a>
+            <a href="#" class="footer-link">Contact Us</a>
+            <a href="#" class="footer-link">About Us</a>
+            <a href="#" class="footer-link">FAQ</a>
+            <a href="https://github.com/your-bhtclub-github" target="_blank" class="footer-link">Bht Club GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>

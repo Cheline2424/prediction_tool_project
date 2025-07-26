@@ -1,213 +1,405 @@
-/* style.css */
-
+/* Struktur dasar */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif; /* Menggunakan Inter sebagai font default */
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a; /* Dark background */
-    color: #e0e0e0; /* Light text for contrast */
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align ke atas untuk konten yang lebih panjang */
+    min-height: 100vh;
+    box-sizing: border-box; /* Pastikan padding dan border termasuk dalam total width/height */
+}
+
+.main-wrapper {
+    width: 100%;
+    max-width: 600px; /* Lebar maksimum untuk tampilan desktop */
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden; /* Pastikan konten tidak meluap dari sudut membulat */
+    margin: 20px; /* Margin di sekitar wrapper */
+}
+
+/* Header Section */
+.header-section {
+    background-color: #8B0000; /* Merah gelap */
+    color: #FFD700; /* Emas */
+    padding: 25px 20px;
+    text-align: center;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main-title {
+    font-size: 2.2em;
+    margin: 0 0 10px;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.sub-title {
+    font-size: 1.4em;
+    margin: 0 0 5px;
+    color: #FFFACD; /* Lemon Chiffon */
+}
+
+.tagline {
+    font-size: 0.9em;
+    color: #F0E68C; /* Khaki */
+    margin: 0;
+}
+
+/* Container Umum */
+.container {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Logo */
+.logo {
+    max-width: 150px; /* Sesuaikan ukuran sesuai kebutuhan */
+    height: auto;
+    display: block; /* Agar bisa diatur margin otomatis */
+    margin: 20px auto; /* Pusatkan logo */
+    border-radius: 10px; /* Sedikit sudut membulat */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Tambahkan sedikit bayangan */
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    flex-wrap: wrap; /* Tombol akan wrap ke baris baru jika tidak muat */
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+/* Gaya umum untuk semua tombol yang bisa diklik */
+.game-button, .guide-link, .password-button {
+    background-color: #28a745; /* Hijau */
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex; /* Untuk ikon dan teks sejajar */
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Jarak antara ikon dan teks */
+    text-decoration: none; /* Penting untuk tag <a> */
+    pointer-events: auto; /* Pastikan bisa diklik */
+}
+
+.game-button:hover, .guide-link:hover, .password-button:hover {
+    background-color: #218838;
+    transform: translateY(-3px);
+}
+
+.game-button i, .guide-link i {
+    font-size: 1.2em;
+}
+
+/* Guide Link (override untuk warna) */
+.guide-link {
+    background-color: #007bff; /* Biru */
+    color: white;
+    margin: 20px auto;
+    display: block; /* Agar bisa diatur margin otomatis */
+    width: fit-content; /* Sesuaikan lebar dengan konten */
+}
+
+.guide-link:hover {
+    background-color: #0056b3;
+}
+
+/* Info Box */
+.info-box {
+    background-color: #fff3cd; /* Kuning muda */
+    border: 1px solid #ffeeba;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    color: #856404; /* Kuning gelap */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.info-box p {
+    margin-bottom: 15px;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+/* Password Button (override untuk warna) */
+.password-button {
+    background-color: #17a2b8; /* Cyan */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    display: inline-block; /* Agar padding dan margin berfungsi */
+}
+
+.password-button:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+}
+
+/* Login Section */
+.login-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa; /* Abu-abu sangat muda */
+    border-top: 1px solid #e9ecef;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.login-section h3 {
+    color: #343a40;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.login-section form {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    background-image: linear-gradient(to bottom, #1a1a1a, #0d0d0d); /* Subtle gradient */
-}
-
-header {
-    background-color: #2b2b2b; /* Slightly lighter dark for header */
-    color: #FFD700; /* Gold text */
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
+    gap: 15px;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-bottom: 2px solid #8A2BE2; /* Purple accent */
 }
 
-.logo {
-    height: 60px; /* Adjust as needed */
-    width: auto;
-    border-radius: 50%; /* Make it round */
-    border: 2px solid #FFD700; /* Gold border around logo */
+.login-section input[type="password"] {
+    width: calc(100% - 40px); /* Kurangi padding */
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1em;
+    max-width: 300px; /* Batasi lebar input */
 }
 
-header h1 {
-    margin: 0;
-    font-size: 2.5em;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-nav a {
-    color: #FFD700; /* Gold link */
-    text-decoration: none;
+.login-section button[type="submit"] {
+    background-color: #28a745; /* Hijau */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
     font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.login-section button[type="submit"]:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Flash Messages */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.flashes li {
     padding: 10px 15px;
-    border: 1px solid #FFD700;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: bold;
 }
 
-nav a:hover {
-    background-color: #FFD700; /* Gold background on hover */
-    color: #1a1a1a; /* Dark text on hover */
+.flashes .success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
 }
 
-main {
-    flex-grow: 1;
-    padding: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 25px; /* Space between sections */
+.flashes .danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flashes .info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Dashboard Specific Styles */
+.dashboard-container {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.welcome-message {
+    font-size: 1.2em;
+    color: #555;
+    margin-bottom: 30px;
 }
 
 .game-section {
-    background-color: #2b2b2b; /* Darker panel background */
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    padding: 25px;
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
-    border: 1px solid #8A2BE2; /* Purple border */
-    transition: transform 0.3s ease-in-out;
+    background-color: #e9ecef; /* Abu-abu muda */
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
 }
 
-.game-section:hover {
-    transform: translateY(-5px); /* Slight lift on hover */
-}
-
-.game-section h2 {
-    color: #FFD700; /* Gold heading */
-    text-align: center;
+.game-section h3 {
+    color: #343a40;
     margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.8em;
-    border-bottom: 1px dashed #555; /* Subtle separator */
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #ced4da;
     padding-bottom: 10px;
 }
 
-.game-info p {
+.game-section p {
     margin-bottom: 10px;
+    font-size: 1em;
+    color: #495057;
+}
+
+.game-section .prediction-result {
     font-size: 1.1em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px dotted #3a3a3a; /* Very subtle separator */
-}
-
-.game-info p:last-child {
-    border-bottom: none;
-}
-
-.game-info span {
     font-weight: bold;
-    color: #e0e0e0; /* Default span text color */
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f0f2f5;
+    border-radius: 8px;
+    border: 1px dashed #ced4da;
 }
 
-/* Specific styles for dynamic content */
-#countdown-1min, #countdown-30s, #countdown-moto {
-    color: #8A2BE2; /* Purple for countdown */
-    font-size: 1.2em;
-    font-family: 'Consolas', monospace; /* Monospace for timer look */
+.game-section .prediction-result span {
+    color: #007bff; /* Biru untuk hasil */
 }
 
-.result-number {
-    font-size: 1.5em;
-    color: #FFD700; /* Gold for number */
-    background-color: #3d3d3d; /* Darker background for number */
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.result-color {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: #fff; /* White text for colors */
-    min-width: 80px;
-    text-align: center;
+.game-section .prediction-result span#wingo_1_min_color,
+.game-section .prediction-result span[id$="_color"][data-color="violet-red"],
+.game-section .prediction-result span[id$="_color"][data-color="violet-green"] {
+    /* Gaya untuk warna hasil WinGo */
     font-weight: bold;
-    text-transform: capitalize;
+    color: #6f42c1; /* Violet */
 }
 
-/* Flash messages for login page */
-.flash-messages {
+
+/* Specific colors for WinGo results */
+.game-section .prediction-result span[id$="_color"][data-color="red"] { color: #dc3545; }
+.game-section .prediction-result span[id$="_color"][data-color="green"] { color: #28a745; }
+
+
+.game-section .refresh-button {
+    background-color: #6c757d; /* Abu-abu */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-section .refresh-button:hover {
+    background-color: #5a6268;
+}
+
+.moto-race-results {
     list-style: none;
     padding: 0;
-    margin: 0 0 15px 0;
-}
-.flash-messages li {
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    font-size: 1em;
-    font-weight: bold;
-}
-.flash-messages .success {
-    background-color: #4CAF50; /* Green */
-    color: white;
-}
-.flash-messages .danger {
-    background-color: #f44336; /* Red */
-    color: white;
-}
-.flash-messages .info {
-    background-color: #2196F3; /* Blue */
-    color: white;
+    margin-top: 10px;
 }
 
-footer {
-    background-color: #2b2b2b;
-    color: #aaa;
+.moto-race-results li {
+    background-color: #f0f2f5;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    font-size: 0.95em;
+    color: #343a40;
+}
+
+/* Footer Navigation */
+.footer-nav {
+    background-color: #343a40; /* Abu-abu gelap */
+    color: #f8f9fa; /* Putih muda */
+    padding: 20px;
     text-align: center;
-    padding: 15px;
-    margin-top: auto; /* Push footer to the bottom */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
-    border-top: 2px solid #8A2BE2; /* Purple accent */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: auto; /* Dorong footer ke bawah */
 }
 
-/* Styling for the login page */
-.login-container {
-    background-color: #2b2b2b; /* Darker background for login form */
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    width: 350px;
-    border: 2px solid #FFD700; /* Gold border */
+.footer-link {
+    color: #adb5bd; /* Abu-abu terang */
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
 }
-.login-container h2 {
-    color: #FFD700; /* Gold heading */
-    margin-bottom: 30px;
-    font-size: 2em;
+
+.footer-link:hover {
+    color: #e9ecef;
+    text-decoration: underline;
 }
-.login-container input[type="password"] {
-    background-color: #3a3a3a; /* Darker input background */
-    color: #e0e0e0; /* Light text */
-    border: 1px solid #555;
-    border-radius: 6px;
-    padding: 12px;
-    width: calc(100% - 24px); /* Adjust for padding */
-    margin-bottom: 20px;
-    font-size: 1.1em;
-}
-.login-container input[type="password"]::placeholder {
-    color: #999;
-}
-.login-container button {
-    background-image: linear-gradient(to right, #8A2BE2, #FFD700); /* Purple to Gold gradient button */
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1.2em;
-    font-weight: bold;
-    width: 100%;
-    transition: opacity 0.3s ease;
-}
-.login-container button:hover {
-    opacity: 0.9;
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 1.8em;
+    }
+
+    .sub-title {
+        font-size: 1.2em;
+    }
+
+    .header-section {
+        padding: 20px 15px;
+    }
+
+    .container, .dashboard-container {
+        padding: 15px;
+    }
+
+    .button-group {
+        flex-direction: column; /* Tombol menumpuk di layar kecil */
+        gap: 10px;
+    }
+
+    .game-button, .password-button, .login-section button[type="submit"] {
+        width: 100%; /* Tombol penuh lebar */
+        padding: 12px;
+    }
+
+    .login-section input[type="password"] {
+        width: calc(100% - 30px); /* Sesuaikan padding */
+    }
+
+    .info-box {
+        padding: 15px;
+    }
+
+    .footer-nav {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
