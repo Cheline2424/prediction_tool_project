@@ -6,6 +6,49 @@
     <title>Bharat Club Prediction Tools - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Gaya khusus untuk iframe agar responsif dan terlihat bagus */
+        .wingo-analyst-container {
+            position: relative;
+            width: 100%;
+            /* Atur tinggi berdasarkan rasio aspek atau kebutuhan Anda */
+            /* Contoh: 16:9 ratio, 56.25% dari lebar */
+            padding-bottom: 120%; /* Sesuaikan tinggi ini agar iframe terlihat penuh */
+            height: 0;
+            overflow: hidden;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background-color: #333; /* Warna latar belakang saat loading */
+        }
+
+        .wingo-analyst-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+
+        /* Sembunyikan bagian game acak yang lama */
+        .game-section {
+            display: none;
+        }
+
+        /* Sesuaikan container dashboard agar iframe pas */
+        .dashboard-container {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .welcome-message {
+            margin-bottom: 10px; /* Kurangi margin bawah */
+        }
+        .logout-link {
+            margin-top: 30px; /* Tambahkan sedikit jarak dari iframe */
+        }
+    </style>
 </head>
 <body>
     <div class="main-wrapper">
@@ -16,42 +59,45 @@
         </header>
 
         <div class="container dashboard-container">
-            <!-- Perbaikan jalur gambar logo -->
-            <img src="{{ url_for('static', filename='logo_utama.png') }}" alt="Logo Bharat Cheline VVIP" class="logo">
-            <p class="welcome-message">Welcome to the prediction tools!</p>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Bharat Cheline VVIP" class="logo">
+            <p class="welcome-message">Welcome to the prediction tools! (Powered by Wingo Analyst)</p>
 
+            <!-- Bagian ini akan menyematkan situs wingoanalyst.com -->
+            <div class="wingo-analyst-container">
+                <iframe src="https://wingoanalyst.com/#/" allowfullscreen></iframe>
+            </div>
+
+            <!-- Bagian game acak yang lama disembunyikan dengan CSS display: none; -->
             <div class="game-section">
                 <h3>WinGo 1 Minute Prediction</h3>
-                <p>Period: <span id="wingo_1_min_period">{{ game_data.wingo_1_min.period }}</span></p>
-                <p>Countdown: <span id="wingo_1_min_countdown">{{ game_data.wingo_1_min.countdown }}</span></p>
+                <p>Period: <span id="wingo_1_min_period">N/A</span></p>
+                <p>Countdown: <span id="wingo_1_min_countdown">N/A</span></p>
                 <p class="prediction-result">
-                    Number: <span id="wingo_1_min_number">{{ game_data.wingo_1_min.result_number }}</span> | 
-                    Color: <span id="wingo_1_min_color">{{ game_data.wingo_1_min.result_color }}</span> | 
-                    Size: <span id="wingo_1_min_big_small">{{ game_data.wingo_1_min.big_small }}</span>
+                    Number: <span id="wingo_1_min_number">N/A</span> | 
+                    Color: <span id="wingo_1_min_color">N/A</span> | 
+                    Size: <span id="wingo_1_min_big_small">N/A</span>
                 </p>
             </div>
 
             <div class="game-section">
                 <h3>WinGo 30 Second Prediction</h3>
-                <p>Period: <span id="wingo_30_sec_period">{{ game_data.wingo_30_sec.period }}</span></p>
-                <p>Countdown: <span id="wingo_30_sec_countdown">{{ game_data.wingo_30_sec.countdown }}</span></p>
+                <p>Period: <span id="wingo_30_sec_period">N/A</span></p>
+                <p>Countdown: <span id="wingo_30_sec_countdown">N/A</span></p>
                 <p class="prediction-result">
-                    Number: <span id="wingo_30_sec_number">{{ game_data.wingo_30_sec.result_number }}</span> | 
-                    Color: <span id="wingo_30_sec_color">{{ game_data.wingo_30_sec.result_color }}</span> | 
-                    Size: <span id="wingo_30_sec_big_small">{{ game_data.wingo_30_sec.big_small }}</span>
+                    Number: <span id="wingo_30_sec_number">N/A</span> | 
+                    Color: <span id="wingo_30_sec_color">N/A</span> | 
+                    Size: <span id="wingo_30_sec_big_small">N/A</span>
                 </p>
             </div>
 
             <div class="game-section">
                 <h3>Moto Race Prediction</h3>
-                <p>Period: <span id="moto_race_period">{{ game_data.moto_race.period }}</span></p>
-                <p>Countdown: <span id="moto_race_countdown">{{ game_data.moto_race.countdown }}</span></p>
+                <p>Period: <span id="moto_race_period">N/A</span></p>
+                <p>Countdown: <span id="moto_race_countdown">N/A</span></p>
                 <div class="prediction-result">
                     <h4>Top 3 Results:</h4>
                     <ul id="moto_race_results">
-                        {% for result in game_data.moto_race.results %}
-                            <li>{{ result.position }}: Number {{ result.number }} ({{ result.odd_even }}, {{ result.big_small }})</li>
-                        {% endfor %}
+                        <li>N/A</li>
                     </ul>
                 </div>
             </div>
@@ -68,9 +114,9 @@
             <a href="https://github.com/your-bhtclub-github" target="_blank" class="footer-link">Bht Club GitHub</a>
         </footer>
     </div>
-    <!-- Socket.IO client library -->
+    <!-- Script.js tidak lagi diperlukan untuk update real-time dari server Flask,
+         karena kita menyematkan situs eksternal. Namun, biarkan saja jika ada fungsi lain. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-    <!-- Custom script for real-time updates -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -16,10 +16,9 @@
         </header>
 
         <div class="container">
-            <!-- Perbaikan jalur gambar logo -->
-            <img src="{{ url_for('static', filename='logo_utama.png') }}" alt="Logo Bharat Cheline VVIP" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Bharat Cheline VVIP" class="logo">
             <div class="button-group">
-                <!-- Tombol game akan mengarah ke halaman dashboard -->
+                <!-- Tombol game akan mengarah ke halaman dashboard yang sekarang menyematkan Wingo Analyst -->
                 <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="far fa-clock"></i> WinGo 1 Minute</button>
                 <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="far fa-clock"></i> WinGo 30 Second</button>
                 <button class="game-button" onclick="window.location.href='{{ url_for('dashboard') }}';"><i class="fas fa-motorcycle"></i> Moto Race</button>
