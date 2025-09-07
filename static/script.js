@@ -29,5 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
             li.textContent = `${result.position}: Number ${result.number} (${result.odd_even}, ${result.big_small})`;
             motoRaceResultsList.appendChild(li);
         });
+
+        // Tambah Update Chicken Road
+        document.getElementById('chicken_road_period').textContent = data.chicken_road.period || 'N/A';
+        document.getElementById('chicken_road_countdown').textContent = data.chicken_road.countdown || 'N/A';
+
+        const chickenRoadResultsList = document.getElementById('chicken_road_results');
+        if (chickenRoadResultsList) {
+            chickenRoadResultsList.innerHTML = ''; // Bersihkan hasil sebelumnya
+            data.chicken_road.results.forEach(result => {
+                const li = document.createElement('li');
+                li.textContent = `Road: ${result.road} | Safe: ${result.safe} | Prediction: ${result.prediction}`;
+                chickenRoadResultsList.appendChild(li);
+            });
+        }
     });
 });

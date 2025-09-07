@@ -295,11 +295,9 @@ body {
     color: #6f42c1; /* Violet */
 }
 
-
 /* Specific colors for WinGo results */
 .game-section .prediction-result span[id$="_color"][data-color="red"] { color: #dc3545; }
 .game-section .prediction-result span[id$="_color"][data-color="green"] { color: #28a745; }
-
 
 .game-section .refresh-button {
     background-color: #6c757d; /* Abu-abu */
@@ -325,6 +323,40 @@ body {
 }
 
 .moto-race-results li {
+    background-color: #f0f2f5;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    font-size: 0.95em;
+    color: #343a40;
+}
+
+/* Tambah Style untuk Chicken Road */
+#chicken_road {
+    background-color: #ff69b4; /* Pink cerah buat Chicken Road */
+    color: white;
+}
+
+#chicken_road:hover {
+    background-color: #ff1493; /* Pink lebih gelap saat hover */
+    transform: translateY(-3px);
+}
+
+#chicken_road_period, #chicken_road_countdown {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #28a745; /* Hijau buat beda */
+}
+
+.chicken-road-results {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.chicken-road-results li {
     background-color: #f0f2f5;
     padding: 8px 12px;
     margin-bottom: 5px;
@@ -401,5 +433,9 @@ body {
     .footer-nav {
         flex-direction: column;
         gap: 10px;
+    }
+
+    #chicken_road {
+        width: 100%; /* Tombol Chicken Road penuh lebar di mobile */
     }
 }
