@@ -7,7 +7,7 @@ from flask_socketio import SocketIO, emit
 import random
 import time
 import requests
-from python_dateutil import parser  # Bener, pake _
+from dateutil import parser  # Bener, pake modul dateutil
 # ====================================================================
 # Konfigurasi Aplikasi Flask
 # ====================================================================
