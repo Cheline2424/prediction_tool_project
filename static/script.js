@@ -2,9 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var socket = io();
 
     socket.on('game_update', function(data) {
-        // Log data yang diterima untuk debugging
         console.log("Data diterima dari server:", data);
-
+        
+        // Update WinGo 30 Second
         const wingo30sec = data.wingo_30_sec;
         if (wingo30sec) {
             document.getElementById('wingo_30_sec_period').textContent = wingo30sec.period || 'N/A';
@@ -14,12 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('wingo_30_sec_big_small').textContent = wingo30sec.big_small || 'N/A';
         }
 
-        // Anda dapat menambahkan logika untuk WinGo 1 Minute di sini jika diperlukan
+        // Update WinGo 1 Minute
         const wingo1min = data.wingo_1_min;
         if (wingo1min) {
-            // Contoh: perbarui elemen untuk WinGo 1 Minute
-            // document.getElementById('wingo_1_min_period').textContent = wingo1min.period || 'N/A';
-            // ... dan seterusnya
+            document.getElementById('wingo_1_min_period').textContent = wingo1min.period || 'N/A';
+            document.getElementById('wingo_1_min_countdown').textContent = wingo1min.countdown || 'N/A';
+            document.getElementById('wingo_1_min_number').textContent = wingo1min.number || 'N/A';
+            document.getElementById('wingo_1_min_color').textContent = wingo1min.color || 'N/A';
+            document.getElementById('wingo_1_min_big_small').textContent = wingo1min.big_small || 'N/A';
         }
     });
 });

@@ -3,6 +3,7 @@
 <head>
     <title>Bharat Club Prediction Tools - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="main-wrapper">
@@ -31,6 +32,21 @@
                 </p>
             </div>
             
+            <div class="game-section">
+                <h3>WinGo 1 Minute Prediction</h3>
+                <p>Periode: <span id="wingo_1_min_period">N/A</span></p>
+                <p>Countdown: <span id="wingo_1_min_countdown">N/A</span></p>
+                <p class="prediction-result">
+                    Prediksi Angka: <span id="wingo_1_min_number">N/A</span>
+                </p>
+                <p class="prediction-result">
+                    Prediksi Warna: <span id="wingo_1_min_color">N/A</span>
+                </p>
+                <p class="prediction-result">
+                    Prediksi Besar/Kecil: <span id="wingo_1_min_big_small">N/A</span>
+                </p>
+            </div>
+
             <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
         </div>
 
