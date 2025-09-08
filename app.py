@@ -8,11 +8,13 @@ import random
 import time
 import requests
 from dateutil import parser
+from flask_cors import CORS
 
 # ====================================================================
 # Konfigurasi Aplikasi Flask
 # ====================================================================
 app = Flask(__name__)
+CORS(app)  # Tambahkan ini untuk mengizinkan koneksi dari browser
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_super_secret_fallback_key_CHANGE_THIS_IN_PRODUCTION')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 MAIN_PASSWORD = os.environ.get('MAIN_APP_PASSWORD', 'bhtclub24')
@@ -22,17 +24,18 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 # Variabel Global dan URL API Asli
 # ====================================================================
 current_game_data = {
-    "wingo_1_min": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0, "big_small": "N/A"},
-    "wingo_30_sec": {"period": "N/A", "countdown": "00:00", "result_number": "N/A", "result_color": "N/A", "end_time": 0, "big_small": "N/A"},
-    "moto_race": {"period": "N/A", "countdown": "00:00", "results": [], "end_time": 0},
-    "chicken_road": {"period": "N/A", "countdown": "00:00", "results": [], "end_time": 0}
+    "wingo_1_min": {"period": "N/A", "countdown": "00:00", "number": "N/A", "color": "N/A", "big_small": "N/A"},
+    "wingo_30_sec": {"period": "N/A", "countdown": "00:00", "number": "N/A", "color": "N/A", "big_small": "N/A"},
+    "moto_race": {"period": "N/A", "countdown": "00:00", "number": "N/A", "color": "N/A", "big_small": "N/A"},
+    "chicken_road": {"period": "N/A", "countdown": "00:00", "number": "N/A", "color": "N/A", "big_small": "N/A"}
 }
 
-# URL API yang sebenarnya kita temukan sebelumnya
+# URL API yang mengambil data JSON bersih, bukan halaman web
 API_URLS = {
     "wingo_30_sec": "https://wingoanalyst.com/api/data_ingo.php?type=30",
-    "wingo_1_min": "https://wingoanalyst.com/api/data_ingo.php?type=60"
-    # URL untuk Moto Race dan Chicken Road tidak diketahui, kita akan buat dummy
+    "wingo_1_min": "https://wingoanalyst.com/api/data_ingo.php?type=60",
+    "moto_race": "https://wingoanalyst.com/api/data_moto.php?type=60", # Ini adalah tebakan URL API yang lebih baik
+    "chicken_road": "https://wingoanalyst.com/api/data_chicken.php?type=45" # Tebakan URL API
 }
 
 # ====================================================================
@@ -48,10 +51,11 @@ def predict_wingo(latest_data):
     last_number = int(latest_data['content']['number'])
     last_color = latest_data['content']['colour']
 
-    # Logika prediksi yang disederhanakan
-    predicted_number = (last_number + 1) % 10  # Contoh: prediksi angka selanjutnya
-    predicted_big_small = 'Big' if predicted_number >= 5 else 'Small'
-
+    # Logika prediksi
+    predicted_number = (last_number % 2 == 0) and 'Ganjil' or 'Genap'
+    predicted_big_small = 'Big' if last_number >= 5 else 'Small'
+    
+    # Logika prediksi warna
     if last_color == 'green':
         predicted_color = 'red'
     elif last_color == 'red':
@@ -64,7 +68,7 @@ def predict_wingo(latest_data):
         "color": predicted_color,
         "big_small": predicted_big_small
     }
-    
+
 # ====================================================================
 # Fungsi Utama untuk Mengambil Data
 # ====================================================================
@@ -79,12 +83,11 @@ def fetch_real_data_and_predict():
         data_30s = response_30s.json()[0]
         prediction_30s = predict_wingo(data_30s)
         
-        # Ambil periode berikutnya
         next_period_30s = str(int(data_30s.get('issueNumber')) + 1)
         
         game_predictions["wingo_30_sec"] = {
             "period": next_period_30s,
-            "countdown": "00:30", # Ini perlu disesuaikan dengan real-time
+            "countdown": "...", # Placeholder, hitungan mundur akan dibuat di frontend
             **prediction_30s
         }
     except Exception as e:
@@ -98,28 +101,23 @@ def fetch_real_data_and_predict():
         data_1min = response_1min.json()[0]
         prediction_1min = predict_wingo(data_1min)
         
-        # Ambil periode berikutnya
         next_period_1min = str(int(data_1min.get('issueNumber')) + 1)
         
         game_predictions["wingo_1_min"] = {
             "period": next_period_1min,
-            "countdown": "01:00", # Ini perlu disesuaikan dengan real-time
+            "countdown": "...",
             **prediction_1min
         }
     except Exception as e:
         print(f"Error fetching/predicting WinGo 1 min: {e}")
         game_predictions["wingo_1_min"] = current_game_data["wingo_1_min"]
 
-    # Dummy data untuk game lain karena tidak ada API
+    # Data dummy untuk game lain karena API-nya belum dikonfirmasi
     game_predictions["moto_race"] = {
-        "period": "N/A",
-        "countdown": "N/A",
-        "results": [{"position": "1", "number": 7}]
+        "period": "N/A", "countdown": "N/A", "number": "N/A", "color": "N/A", "big_small": "N/A"
     }
     game_predictions["chicken_road"] = {
-        "period": "N/A",
-        "countdown": "N/A",
-        "results": [{"road": 1, "safe": "Yes"}]
+        "period": "N/A", "countdown": "N/A", "number": "N/A", "color": "N/A", "big_small": "N/A"
     }
 
     return game_predictions
@@ -131,25 +129,21 @@ def game_data_fetcher():
     """Ambil data game real-time dari API dan kirim ke klien via SocketIO."""
     while True:
         try:
-            # Ambil data dan prediksi
             updated_data = fetch_real_data_and_predict()
             
-            # Perbarui variabel global
             for game_type, data in updated_data.items():
                 current_game_data[game_type].update(data)
                 
-            # Kirim data terbaru ke semua klien yang terhubung
             socketio.emit('game_update', current_game_data)
             print("Mengirim data prediksi terbaru:", current_game_data)
             
         except Exception as e:
             print(f"Error in main fetcher loop: {e}")
 
-        # Tunggu sebelum mengambil data lagi. Sesuaikan sesuai interval game
-        time.sleep(30)
+        time.sleep(30) # Cek setiap 30 detik
 
 # ====================================================================
-# Route Flask (Tidak Diubah)
+# Route Flask
 # ====================================================================
 @app.route('/')
 def show_landing_page():
@@ -177,6 +171,8 @@ def dashboard():
         session.pop('auth_expiry', None)
         flash('Your session has expired or you are not logged in. Please enter the password to access the tools.', 'danger')
         return redirect(url_for('show_landing_page'))
+    
+    # Kirim data ke template dashboard
     return render_template('dashboard.html', game_data=current_game_data)
 
 @app.route('/guide')
@@ -191,7 +187,7 @@ def logout():
     return redirect(url_for('show_landing_page'))
 
 # ====================================================================
-# Event Listener SocketIO (Tidak Diubah)
+# Event Listener SocketIO
 # ====================================================================
 @socketio.on('connect')
 def handle_connect():
